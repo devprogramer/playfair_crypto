@@ -1,21 +1,69 @@
  text = "ППриветик я тебя узнал";
+ 
+ key = "I love Jesus";
+ 
             stopSymbol = 0;
             symbolsMatrix= [];
-            symbolsMatrixIndex = {}            ;
+            symbolsMatrixIndex = {};
+            
+            
+        
+        function prepareKey(key){
+            var keyArr = [];
+            for(var i=0; i< key.length; i++ ){
+                var charCode = key.charCodeAt(i);
+                if(keyArr.indexOf(charCode) < 0){
+                    keyArr.push(charCode);
+                }
+            }
+            
+            return keyArr;
+        }
+        
+//        console.log(prepareKey(key));
             
             
         function fullFillMatrix(){
+            
+            var _key = prepareKey(key),
+                iter = 0;
+//        _key = [];
+//            console.log(_key);
+            
+            if(_key.length){
+                for (var i=0; i< 36; i++){
+                    for(var j=0; j< 36; j++){
+                        if(!symbolsMatrix[i]) symbolsMatrix[i] = [];
+                        symbolsMatrix[i][j] = _key[iter];
+                        symbolsMatrixIndex[_key[iter]] = {x:j, y:i};
+                        iter ++;
+                        if(!_key[iter]) break;
+                    }
+                    if(!_key[iter]) break;
+                }
+                
+            }
           
+//          console.log(symbolsMatrix);
+//          return;
           var code = 0;
-          for (var i=0; i< 36; i++){
-              for(var j=0; j< 36; j++){
-                if(!symbolsMatrix[i]) symbolsMatrix[i] = [];
-                symbolsMatrix[i][j] = code;
-                symbolsMatrixIndex[code] = {x:j, y:i};
+          for (var i= ((symbolsMatrix.length == 0) ? 0 : symbolsMatrix.length-1); i< 36; i++){
+              if(!symbolsMatrix[i]) symbolsMatrix[i] = [];
+              for(var j=( (symbolsMatrix[i].length == 0) ? 0 : symbolsMatrix[i].length); j< 36; j++){
+                  
+                
+//                console.log(i,j);
+//                return;
+                  
+                if(key.indexOf(code) < 0){
+                    symbolsMatrix[i][j] = code;
+                    symbolsMatrixIndex[code] = {x:j, y:i};
+                }
                 code ++;
                 // console.log(symbolsMatrix[i][j]);
               }
           }
+          console.log(symbolsMatrix);
           return symbolsMatrix;
         }
 
@@ -62,7 +110,7 @@
           return bigrams;
         }
         
-        fullFillMatrix();
+        
         
         function encode(bigrams){
             var encodedBigrams = [];
@@ -137,6 +185,8 @@
                 var b1 = symbolsMatrixIndex[b[0]];
                 var b2 = symbolsMatrixIndex[b[1]];
                 if(b1.x == b2.x){
+                    
+                    
                     if(symbolsMatrix[b1.x-1]){
                        _b1 =  symbolsMatrix[b1.x-1][b1.y];
                     }else{
@@ -147,6 +197,8 @@
                     }else{
                         _b2 =  symbolsMatrix[symbolsMatrix.length-1][b2.y];
                     }
+                    
+                    console.log(_b1, b2);
                 }else if(b1.y == b2.y){
                     if(symbolsMatrix[b1.x][b1.y-1]){
                        _b1 =  symbolsMatrix[b1.x][b1.y-1];
@@ -164,17 +216,19 @@
                     _b2 = symbolsMatrix[b1.x][b2.y];
                      
                 }
-                encodedBigrams.push([_b1, _b2]);
+                encodedBigrams.push([_b2, _b1]);
             });
             
             return encodedBigrams
         }
+        fullFillMatrix();
+        
         
         b = encode(createBigrams(text));
         b = bigramsToString(b);
         b = decode(createBigrams(b));
-        b = bigramsToString(b);
-        
+        b = decBigramsToString(b);
+//        
         
         
         console.log(b);
