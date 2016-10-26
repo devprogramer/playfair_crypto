@@ -1,10 +1,18 @@
- text = "ППриветик я тебя узнал";
+ text = "hello how are you";
  
- key = "I love Jesus";
+ key = "kwerty";
  
-            stopSymbol = 0;
+            stopSymbol = "x".charCodeAt(0);
             symbolsMatrix= [];
-            symbolsMatrixIndex = {};
+            symbolsMatrixIndex = {},
+            matrixWidth = 2,
+            matrixHeight = 13,
+            aviableSymbols=["a","b","c","d", "e",
+                            "f","g","h","i", "j",
+                            "k","l","m","n", "o",
+                            "p",  "r","s","t", "u",
+                            "v","w","x","y", "z", " "
+                            ];
             
             
         
@@ -20,50 +28,50 @@
             return keyArr;
         }
         
-//        console.log(prepareKey(key));
-            
-            
         function fullFillMatrix(){
             
-            var _key = prepareKey(key),
-                iter = 0;
-//        _key = [];
-//            console.log(_key);
-            
+           
+             var _key = prepareKey(key);
+
+              
+              var xCoords = [],
+                  j=0, i=0;
+
             if(_key.length){
-                for (var i=0; i< 36; i++){
-                    for(var j=0; j< 36; j++){
-                        if(!symbolsMatrix[i]) symbolsMatrix[i] = [];
-                        symbolsMatrix[i][j] = _key[iter];
-                        symbolsMatrixIndex[_key[iter]] = {x:j, y:i};
-                        iter ++;
-                        if(!_key[iter]) break;
-                    }
-                    if(!_key[iter]) break;
+              _key.forEach(function(e){
+
+                xCoords.push(e);
+                // console.log(String.fromCharCode(e), j, i);
+                symbolsMatrixIndex[e] = {x:j, y:i };
+                j++;
+                if(xCoords.length == matrixWidth){
+                  symbolsMatrix.push(xCoords);
+                  xCoords = [];
+                  j=0;
+                  i++;
                 }
-                
+              })
+
+
+
+              
+
             }
-          
-//          console.log(symbolsMatrix);
-//          return;
-          var code = 0;
-          for (var i= ((symbolsMatrix.length == 0) ? 0 : symbolsMatrix.length-1); i< 36; i++){
-              if(!symbolsMatrix[i]) symbolsMatrix[i] = [];
-              for(var j=( (symbolsMatrix[i].length == 0) ? 0 : symbolsMatrix[i].length); j< 36; j++){
-                  
-                
-//                console.log(i,j);
-//                return;
-                  
-                if(key.indexOf(code) < 0){
-                    symbolsMatrix[i][j] = code;
-                    symbolsMatrixIndex[code] = {x:j, y:i};
+
+            aviableSymbols.forEach(function(s){
+                e = s.charCodeAt(0);
+                if(symbolsMatrixIndex[e]) return;
+                xCoords.push(e);
+                // console.log(s, j, i);
+                symbolsMatrixIndex[e] = {x:j, y:i };
+                j++;
+                if(xCoords.length == matrixWidth){
+                  symbolsMatrix.push(xCoords);
+                  xCoords = [];
+                  j=0;
+                  i++;
                 }
-                code ++;
-                // console.log(symbolsMatrix[i][j]);
-              }
-          }
-          console.log(symbolsMatrix);
+            })
           return symbolsMatrix;
         }
 
@@ -114,6 +122,7 @@
         
         function encode(bigrams){
             var encodedBigrams = [];
+
             bigrams.forEach(function(b){
                 var tmp = [],
                     _b1=[],
@@ -121,32 +130,33 @@
                 
                 var b1 = symbolsMatrixIndex[b[0]];
                 var b2 = symbolsMatrixIndex[b[1]];
-                if(b1.x == b2.x){
-                    if(symbolsMatrix[b1.x+1]){
-                       _b1 =  symbolsMatrix[b1.x+1][b1.y];
+                if(b1.y == b2.y){
+
+                    if(symbolsMatrix[b1.y][b1.x+1]){
+                       _b1 =  symbolsMatrix[b1.y][b1.x+1];
                     }else{
-                        _b1 =  symbolsMatrix[0][b1.y];
+                        _b1 =  symbolsMatrix[b1.y][0];
                     }
-                    if(symbolsMatrix[b2.x+1]){
-                       _b2 =  symbolsMatrix[b2.x+1][b2.y];
+
+                    if(symbolsMatrix[b2.y][b2.x+1]){
+                       _b2 =  symbolsMatrix[b2.y][b2.x+1];
                     }else{
-                        _b2 =  symbolsMatrix[0][b2.y];
+                        _b2 =  symbolsMatrix[b2.y][0];
                     }
-                }else if(b1.y == b2.y){
-                    if(symbolsMatrix[b1.x][b1.y+1]){
-                       _b1 =  symbolsMatrix[b1.x][b1.y+1];
+                }else if(b1.x == b2.x){
+                    if(symbolsMatrix[b1.y+1]){
+                       _b1 =  symbolsMatrix[b1.y+1][b1.x];
                     }else{
-                        _b1 =  symbolsMatrix[b1.x][0];
+                        _b1 =  symbolsMatrix[0][b1.x];
                     }
-                    if(symbolsMatrix[b2.x][b2.y+1]){
-                       _b2 =  symbolsMatrix[b2.x][b2.y+1];
+                    if(symbolsMatrix[b2.y+1]){
+                       _b2 =  symbolsMatrix[b2.y+1][b2.x];
                     }else{
-                        _b2 =  symbolsMatrix[b2.x][0];
+                        _b2 =  symbolsMatrix[0][b2.x];
                     }
-                   
                 }else{
-                    _b1 = symbolsMatrix[b2.x][b1.y];
-                    _b2 = symbolsMatrix[b1.x][b2.y];
+                    _b1 = symbolsMatrix[b1.y][b2.x];
+                    _b2 = symbolsMatrix[b2.y][b1.x];
                      
                 }
                 encodedBigrams.push([_b1, _b2]);
@@ -185,53 +195,77 @@
                 var b1 = symbolsMatrixIndex[b[0]];
                 var b2 = symbolsMatrixIndex[b[1]];
                 if(b1.x == b2.x){
+
+
+
                     
                     
-                    if(symbolsMatrix[b1.x-1]){
-                       _b1 =  symbolsMatrix[b1.x-1][b1.y];
+                    if(symbolsMatrix[b1.y-1]){
+                       _b1 =  symbolsMatrix[b1.y-1][b1.x];
+                       // console.log(++  );
                     }else{
-                        _b1 =  symbolsMatrix[symbolsMatrix.length-1][b1.y];
+                        _b1 =  symbolsMatrix[symbolsMatrix.length-1][b1.x];
                     }
-                    if(symbolsMatrix[b2.x-1]){
-                       _b2 =  symbolsMatrix[b2.x-1][b2.y];
+                    if(symbolsMatrix[b2.y-1]){
+                       _b2 =  symbolsMatrix[b2.y-1][b2.x];
                     }else{
-                        _b2 =  symbolsMatrix[symbolsMatrix.length-1][b2.y];
+                        _b2 =  symbolsMatrix[symbolsMatrix.length-1][b2.x];
                     }
+
+
                     
-                    console.log(_b1, b2);
+                   
+
+
                 }else if(b1.y == b2.y){
-                    if(symbolsMatrix[b1.x][b1.y-1]){
-                       _b1 =  symbolsMatrix[b1.x][b1.y-1];
+                    if(symbolsMatrix[b1.y][b1.x-1]){
+                       _b1 =  symbolsMatrix[b1.y][b1.x-1];
                     }else{
-                        _b1 =  symbolsMatrix[b1.x][symbolsMatrix[b1.x].length-1];
+                        _b1 =  symbolsMatrix[b1.y][symbolsMatrix[b1.y].length-1];
                     }
-                    if(symbolsMatrix[b2.x][b2.y-1]){
-                       _b2 =  symbolsMatrix[b2.x][b2.y-1];
+                    if(symbolsMatrix[b2.y][b2.x-1]){
+                       _b2 =  symbolsMatrix[b2.y][b2.x-1];
                     }else{
-                        _b2 =  symbolsMatrix[b2.x][symbolsMatrix[b1.x].length-1];
+                        _b2 =  symbolsMatrix[b2.y][symbolsMatrix[b1.y].length-1];
                     }
                    
                 }else{
-                    _b1 = symbolsMatrix[b2.x][b1.y];
-                    _b2 = symbolsMatrix[b1.x][b2.y];
+                    
+
+                     _b1 = symbolsMatrix[b1.y][b2.x];
+                    _b2 = symbolsMatrix[b2.y][b1.x];
                      
                 }
-                encodedBigrams.push([_b2, _b1]);
+                encodedBigrams.push([_b1, _b2]);
             });
             
             return encodedBigrams
         }
         fullFillMatrix();
+
+
+        /* k w e r t 
+           y a b c d
+           f g h i j
+           l m n o p
+           s u v x z
+ 
+        */
         
+        b= createBigrams(text);
+        // he lx lo ho wa re yo ux
+
+
+        b = encode(b);
         
-        b = encode(createBigrams(text));
         b = bigramsToString(b);
-        b = decode(createBigrams(b));
+        b = createBigrams(b)
+        b = decode(b);
         b = decBigramsToString(b);
 //        
         
         
-        console.log(b);
+        // console.log(b);
         
 //        console.log(symbolsMatrixIndex[100]);
 //        console.log(symbolsMatrix[2][28]);
