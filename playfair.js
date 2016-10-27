@@ -1,21 +1,31 @@
- text = "hello how are you";
+ text = "Привет, я за шифрованное послание!";
  
  key = "kwerty";
  
-            stopSymbol = "x".charCodeAt(0);
+            stopSymbol = 0;
             symbolsMatrix= [];
-            symbolsMatrixIndex = {},
-            matrixWidth = 2,
-            matrixHeight = 13,
+            symbolsMatrixIndex = {};
+            matrixWidth = 5;
+            // matrixHeight = 13,
             aviableSymbols=["a","b","c","d", "e",
                             "f","g","h","i", "j",
                             "k","l","m","n", "o",
                             "p",  "r","s","t", "u",
                             "v","w","x","y", "z", " "
                             ];
+            lastSymbol = 1400;
             
-            
-        
+        aviableSymbols = [];
+        function createAviablesSymbols(){
+          aviableSymbols = [];
+
+          for(var i=0; i<( matrixWidth * Math.floor(lastSymbol/matrixWidth)); i++){
+            aviableSymbols.push(String.fromCharCode(i))
+          }
+
+        }
+
+
         function prepareKey(key){
             var keyArr = [];
             for(var i=0; i< key.length; i++ ){
@@ -29,6 +39,9 @@
         }
         
         function fullFillMatrix(){
+
+            symbolsMatrix= [];
+            symbolsMatrixIndex = {};
             
            
              var _key = prepareKey(key);
@@ -100,21 +113,30 @@
           var bigrams = [];
           var tmp = [];
           for(var i = 0; i<text.length; i++){
+
+            // console.log(i);
+
               tmp.push(text.charCodeAt(i));
 
               if(text.charCodeAt(i+1) && text.charCodeAt(i+1) == text.charCodeAt(i)){
                 tmp.push(stopSymbol);
               }
               if(tmp.length === 2){
+                // console.log(i);
                 bigrams.push(tmp);
                 tmp = [];
               }
+              console.log(bigrams.length);
           }
           if(tmp.length === 1){
             tmp.push(stopSymbol);
             bigrams.push(tmp);
 
           } 
+
+
+          // console.log(bigrams);
+
           return bigrams;
         }
         
@@ -241,7 +263,11 @@
             
             return encodedBigrams
         }
+        createAviablesSymbols();
+        // t = (new Date()).getTime();
+
         fullFillMatrix();
+        // console.log((new Date()).getTime()-t);
 
 
         /* k w e r t 
@@ -269,8 +295,33 @@
         
 //        console.log(symbolsMatrixIndex[100]);
 //        console.log(symbolsMatrix[2][28]);
-        
+        function playfairEncode(text){
+          var b= createBigrams(text);
+          b = encode(b);
+          b = bigramsToString(b);
+          return b;
+
+        }
+
+        function playfairDecode(text){
+          var b= createBigrams(text);
+          b = decode(b);
+          b = decBigramsToString(b);
+          return b;
+
+        }
+
         function playfair(){
+           b= createBigrams(text);
+        // he lx lo ho wa re yo ux
+
+
+        b = encode(b);
+        
+        b = bigramsToString(b);
+        b = createBigrams(b)
+        b = decode(b);
+        b = decBigramsToString(b);
             
         }
         
